@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Aura — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c14;
+  --bg2:#10131f;
+  --bg3:#171b2a;
+  --surface:#1e2335;
+  --border:rgba(255,255,255,.08);
+  --border2:rgba(255,255,255,.14);
+  --text:#e8eaf6;
+  --muted:#8b91b5;
+  --dim:#4d5478;
+  --accent:#7c6af7;
+  --accent2:#9d8ffa;
+  --green:#34d399;
+  --red:#f87171;
+  --yellow:#fbbf24;
+  --r:10px;
+  --sans:'Geist',system-ui,sans-serif;
+  --mono:'Geist Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;font-size:14px}
+a{color:inherit;text-decoration:none}
+input,textarea,select{font-family:var(--sans);font-size:14px}
+button{font-family:var(--sans);cursor:pointer}
+
+/* ── Layout ── */
+#app{height:100%;display:flex;flex-direction:column}
+.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;background:var(--bg2);position:sticky;top:0;z-index:10;flex-shrink:0}
+.topbar-logo{font-weight:700;font-size:16px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.topbar-logo span{background:linear-gradient(135deg,#7c6af7,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.topbar-spacer{flex:1}
+.topbar-user{color:var(--muted);font-size:13px}
+.topbar-signout{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:13px;transition:.15s}
+.topbar-signout:hover{color:var(--text);border-color:var(--border2);background:var(--surface)}
+
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;border-right:1px solid var(--border);background:var(--bg2);padding:16px 12px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer;transition:.15s;font-size:13px;font-weight:500;border:none;background:transparent;width:100%;text-align:left}
+.nav-item svg{opacity:.7;flex-shrink:0}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent2)}
+.nav-item.active svg{opacity:1}
+
+.content{flex:1;overflow-y:auto;padding:28px 32px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── Login ── */
+#login-screen{height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px}
+.login-logo{font-size:22px;font-weight:700;margin-bottom:6px}
+.login-logo span{background:linear-gradient(135deg,#7c6af7,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:28px}
+.login-err{background:color-mix(in srgb,var(--red) 12%,transparent);border:1px solid color-mix(in srgb,var(--red) 30%,transparent);color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+
+/* ── Form elements ── */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:9px 12px;outline:none;transition:.15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.field textarea{resize:vertical;min-height:110px;line-height:1.5}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b91b5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-weight:600;font-size:13px;border:none;transition:.15s;cursor:pointer}
+.btn-primary{background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 80%,#5040d0));color:#fff;box-shadow:0 4px 14px -6px color-mix(in srgb,var(--accent) 60%,transparent)}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;pointer-events:none}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.btn-ghost:hover{color:var(--text);background:var(--surface)}
+
+/* ── Section headers ── */
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:13px;margin-bottom:28px}
+
+/* ── Stat cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.stat-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.stat-value{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.stat-card.green .stat-value{color:var(--green)}
+.stat-card.purple .stat-value{color:var(--accent2)}
+.stat-card.yellow .stat-value{color:var(--yellow)}
+
+/* ── Plan distribution chart ── */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:28px}
+.chart-title{font-weight:600;font-size:14px;margin-bottom:18px}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.bar-label{width:50px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:10px;background:var(--bg3);border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.bar-count{width:32px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ── Plan cards ── */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.plan-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px}
+.plan-card-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.plan-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.badge-bond{background:color-mix(in srgb,#34d399 15%,transparent);color:#34d399}
+.badge-soul{background:color-mix(in srgb,#c084fc 15%,transparent);color:#c084fc}
+.plan-name{font-weight:700;font-size:15px}
+.price-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── Chatbot config ── */
+.config-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;margin-bottom:18px}
+.config-card-title{font-weight:600;font-size:14px;margin-bottom:18px;display:flex;align-items:center;gap:8px;color:var(--text)}
+
+.divider{height:1px;background:var(--border);margin:24px 0}
+
+.tag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tag-green{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)}
+.tag-red{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.tag-dim{background:var(--bg3);color:var(--muted)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border2);padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:none}
+.toast.success{border-color:color-mix(in srgb,var(--green) 35%,transparent);color:var(--green)}
+.toast.error{border-color:color-mix(in srgb,var(--red) 35%,transparent);color:var(--red)}
+
+.hint{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.4}
+.loading-row{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.mono{font-family:var(--mono)}
+
+/* ── Password eye toggle ── */
+.pass-wrap{position:relative}
+.pass-wrap input{padding-right:40px}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--dim);padding:2px;display:flex;align-items:center;transition:.15s}
+.eye-btn:hover{color:var(--text)}
+
+/* ── Info tooltip ── */
+.cost-tip{position:relative;display:inline-flex;align-items:center;cursor:help;margin-left:6px;vertical-align:middle}
+.cost-tip svg{color:var(--dim);transition:.15s}
+.cost-tip:hover svg{color:var(--accent2)}
+.cost-tip .tip-box{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:11px 13px;font-size:11px;color:var(--text);white-space:nowrap;z-index:100;line-height:1.85;min-width:270px;box-shadow:0 8px 24px rgba(0,0,0,.45);pointer-events:none}
+.cost-tip:hover .tip-box{display:block}
+.cost-tip .tip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border2)}
+</style>
+</head>
+<body>
+
+<!-- ── Login screen ─────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">✦ <span>Aura</span> Admin</div>
+    <div class="login-sub">Sign in to manage your platform</div>
+    <div class="login-err" id="loginErr"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pass-wrap">
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"/>
+        <button type="button" class="eye-btn" id="eyeBtn" onclick="togglePass()" title="Show / hide password">
+          <svg id="eyeIcon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()" style="width:100%;justify-content:center;margin-top:4px">
+      Sign in
+    </button>
+  </div>
+</div>
+
+<!-- ── Admin app ─────────────────────────────────────────────────────────── -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-logo">✦ <span>Aura</span> Admin</div>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-user" id="topbarUser"></span>
+    <button class="topbar-signout" onclick="signOut()">Sign out</button>
+  </div>
+  <div class="main">
+    <nav class="sidebar">
+      <button class="nav-item active" data-panel="analytics" onclick="switchPanel('analytics',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+        Analytics
+      </button>
+      <button class="nav-item" data-panel="pricing" onclick="switchPanel('pricing',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Pricing
+      </button>
+      <button class="nav-item" data-panel="chatbot" onclick="switchPanel('chatbot',this)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Chatbot
+      </button>
+    </nav>
+
+    <div class="content">
+
+      <!-- ── Analytics panel ───────────────────────────────────────────── -->
+      <div class="panel active" id="panel-analytics">
+        <div class="page-title">Analytics</div>
+        <div class="page-sub">Live data from Supabase and Stripe</div>
+
+        <div id="analyticsLoading" class="loading-row" style="margin-bottom:24px">
+          <div class="spinner"></div> Loading analytics…
+        </div>
+
+        <div id="analyticsContent" style="display:none">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total users</div>
+              <div class="stat-value" id="statTotalUsers">—</div>
+              <div class="stat-sub" id="statNewUsers">— new this month</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-label">MRR</div>
+              <div class="stat-value" id="statMrr">—</div>
+              <div class="stat-sub" id="statArr">— ARR</div>
+            </div>
+            <div class="stat-card purple">
+              <div class="stat-label">Active subs</div>
+              <div class="stat-value" id="statSubs">—</div>
+              <div class="stat-sub">paid plans</div>
+            </div>
+            <div class="stat-card yellow">
+              <div class="stat-label">Conversion</div>
+              <div class="stat-value" id="statConv">—</div>
+              <div class="stat-sub">free → paid</div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Plan distribution</div>
+            <div class="bar-row">
+              <div class="bar-label">Spark</div>
+              <div class="bar-track"><div class="bar-fill" id="barSpark" style="background:#4d5478;width:0%"></div></div>
+              <div class="bar-count" id="cntSpark">0</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Bond</div>
+              <div class="bar-track"><div class="bar-fill" id="barBond" style="background:#34d399;width:0%"></div></div>
+              <div class="bar-count" id="cntBond">0</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Soul</div>
+              <div class="bar-track"><div class="bar-fill" id="barSoul" style="background:#c084fc;width:0%"></div></div>
+              <div class="bar-count" id="cntSoul">0</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:12px;color:var(--muted)" id="analyticsTs"></div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="loadAnalytics()">↺ Refresh</button>
+          </div>
+
+          <div id="stripeWarning" style="display:none" class="hint" style="color:var(--yellow)">
+            ⚠ Stripe not connected — revenue data unavailable. Add STRIPE_SECRET_KEY to env.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Pricing panel ─────────────────────────────────────────────── -->
+      <div class="panel" id="panel-pricing">
+        <div class="page-title">Pricing</div>
+        <div class="page-sub">Update display prices and Stripe Price IDs. Changes take effect immediately.</div>
+
+        <div id="pricingLoading" class="loading-row" style="margin-bottom:24px">
+          <div class="spinner"></div> Loading config…
+        </div>
+
+        <div id="pricingContent" style="display:none">
+          <div class="plan-grid">
+            <!-- Bond -->
+            <div class="plan-card">
+              <div class="plan-card-header">
+                <span class="plan-badge badge-bond">Bond</span>
+                <span class="plan-name">Bond Plan</span>
+              </div>
+              <div class="price-row">
+                <div class="field">
+                  <label>Monthly price ($)</label>
+                  <input type="number" id="bondMonthly" min="0" step="0.01" placeholder="12.00"/>
+                </div>
+                <div class="field">
+                  <label>Annual price ($)</label>
+                  <input type="number" id="bondAnnual" min="0" step="0.01" placeholder="9.00"/>
+                </div>
+              </div>
+              <div class="field">
+                <label>Stripe Price ID (monthly)</label>
+                <input type="text" id="bondPriceId" class="mono" placeholder="price_1ABC…"/>
+                <div class="hint">Create a new price in Stripe Dashboard → Products and paste the ID here.</div>
+              </div>
+              <button class="btn btn-primary" onclick="savePlan('bond')">Save Bond</button>
+            </div>
+
+            <!-- Soul -->
+            <div class="plan-card">
+              <div class="plan-card-header">
+                <span class="plan-badge badge-soul">Soul</span>
+                <span class="plan-name">Soul Plan</span>
+              </div>
+              <div class="price-row">
+                <div class="field">
+                  <label>Monthly price ($)</label>
+                  <input type="number" id="soulMonthly" min="0" step="0.01" placeholder="29.00"/>
+                </div>
+                <div class="field">
+                  <label>Annual price ($)</label>
+                  <input type="number" id="soulAnnual" min="0" step="0.01" placeholder="22.00"/>
+                </div>
+              </div>
+              <div class="field">
+                <label>Stripe Price ID (monthly)</label>
+                <input type="text" id="soulPriceId" class="mono" placeholder="price_1DEF…"/>
+                <div class="hint">Create a new price in Stripe Dashboard → Products and paste the ID here.</div>
+              </div>
+              <button class="btn btn-primary" onclick="savePlan('soul')">Save Soul</button>
+            </div>
+          </div>
+
+          <div class="hint">
+            💡 Stripe prices are immutable. To change a price, create a new one in the <a href="https://dashboard.stripe.com/products" target="_blank" style="color:var(--accent2)">Stripe Dashboard</a> and enter its ID above.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Chatbot panel ─────────────────────────────────────────────── -->
+      <div class="panel" id="panel-chatbot">
+        <div class="page-title">Chatbot</div>
+        <div class="page-sub">Configure your AI companion's global behaviour and defaults.</div>
+
+        <div id="chatbotLoading" class="loading-row" style="margin-bottom:24px">
+          <div class="spinner"></div> Loading config…
+        </div>
+
+        <div id="chatbotContent" style="display:none">
+
+          <div class="config-card">
+            <div class="config-card-title">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+              System Prompt Prefix
+            </div>
+            <div class="field">
+              <label>Prepended to every companion's system prompt</label>
+              <textarea id="cfgSystemPrefix" placeholder="E.g. Always respond in a warm, empathetic tone. Never break character. Keep all responses under 5 sentences unless the user asks for more detail…"></textarea>
+              <div class="hint">This text is injected before the companion-specific prompt. Use it to enforce platform-wide rules, tone guidelines, or safety instructions.</div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-title">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+              Default Greeting
+            </div>
+            <div class="field">
+              <label>Fallback greeting (when companion has no custom greeting)</label>
+              <input type="text" id="cfgWelcome" placeholder="Hey, I'm here. What's on your mind?"/>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-title">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 5.34L3.93 3.93"/></svg>
+              Model Override
+            </div>
+            <div class="field">
+              <label>Force a specific model for ALL plans (leave blank to use plan defaults)
+                <span class="cost-tip">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                  <span class="tip-box">
+                    <strong style="color:var(--accent2)">Anthropic token pricing</strong><br>
+                    Haiku 4.5 &nbsp;— $0.80 / $4.00 per 1M tokens (in / out)<br>
+                    Sonnet 4.6 — $3.00 / $15.00 per 1M tokens (in / out)<br>
+                    <span style="color:var(--dim)">Typical response ≈ 200–500 output tokens</span>
+                  </span>
+                </span>
+              </label>
+              <select id="cfgModel" onchange="updateCostEstimate()">
+                <option value="">— Use plan defaults —</option>
+                <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fast, cheap)</option>
+                <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (smart, premium)</option>
+              </select>
+              <div class="hint">⚠ Overriding to Sonnet for all plans will significantly increase costs.</div>
+            </div>
+            <div class="field">
+              <label>Max tokens override (leave blank to use plan defaults)</label>
+              <input type="number" id="cfgMaxTokens" min="50" max="2048" step="50" placeholder="e.g. 400" oninput="updateCostEstimate()"/>
+              <div class="hint">Plan defaults: Spark 250 · Bond 400 · Soul 600 · Guest 200</div>
+              <div class="hint" id="costEstimate" style="margin-top:4px;color:var(--accent2)"></div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-title">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M8 12l2 2 4-4"/></svg>
+              Response Behaviour
+            </div>
+            <div class="field">
+              <label>Temperature (creativity) — <span id="tempVal">0.70</span></label>
+              <input type="range" id="cfgTemperature" min="0" max="1" step="0.05" value="0.7"
+                oninput="document.getElementById('tempVal').textContent=parseFloat(this.value).toFixed(2)"
+                style="width:100%;accent-color:var(--accent);cursor:pointer"/>
+              <div class="hint">0 = precise &amp; deterministic · 1 = creative &amp; varied &nbsp;(default: 0.70)</div>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Context history depth (messages)</label>
+              <input type="number" id="cfgHistoryDepth" min="2" max="60" step="2" placeholder="20"/>
+              <div class="hint">How many past messages to include per request. Higher = better memory but more tokens consumed.</div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-title">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Rate Limiting — Messages per Day
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="field" style="margin-bottom:0">
+                <label>Spark</label>
+                <input type="number" id="cfgLimitSpark" min="0" step="5" placeholder="30"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label>Bond</label>
+                <input type="number" id="cfgLimitBond" min="0" step="5" placeholder="100"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label>Soul</label>
+                <input type="number" id="cfgLimitSoul" min="0" step="5" placeholder="300"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label>Guest</label>
+                <input type="number" id="cfgLimitGuest" min="0" step="5" placeholder="10"/>
+              </div>
+            </div>
+            <div class="hint" style="margin-top:10px">Set to 0 to disable rate limiting for that plan.</div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-title">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Content Safety
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Safety filter level</label>
+              <select id="cfgSafetyLevel">
+                <option value="strict">Strict — extra guardrails, refuse ambiguous topics</option>
+                <option value="standard" selected>Standard — default Claude safety (recommended)</option>
+                <option value="relaxed">Relaxed — fewer refusals, adult audiences only</option>
+              </select>
+              <div class="hint">⚠ Relaxed mode may expose users to sensitive content. Ensure your Terms of Service reflects this.</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="saveChatbotBtn" onclick="saveChatbot()">
+            Save chatbot settings
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://auracompanion-production.up.railway.app/api';
+let TOKEN = '';
+
+/* ── Password eye toggle ─────────────────────────────────────────────────── */
+function togglePass(){
+  const inp=document.getElementById('loginPass');
+  const icon=document.getElementById('eyeIcon');
+  if(inp.type==='password'){
+    inp.type='text';
+    icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type='password';
+    icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+/* ── Token cost estimate ──────────────────────────────────────────────────── */
+function updateCostEstimate(){
+  const model=document.getElementById('cfgModel').value;
+  const tokens=parseInt(document.getElementById('cfgMaxTokens').value)||0;
+  const el=document.getElementById('costEstimate');
+  if(!model||!tokens){el.textContent='';return;}
+  const rateOut=model.includes('haiku')?0.000004:0.000015; // $ per output token
+  const rateIn =model.includes('haiku')?0.0000008:0.000003;
+  const costPer=(tokens*rateOut + 50*rateIn); // ~50 tokens avg input overhead
+  el.textContent=`≈ $${costPer.toFixed(5)} per response · $${(costPer*1000).toFixed(2)} per 1,000 messages`;
+}
+
+/* ── Auth helpers ─────────────────────────────────────────────────────────── */
+function saveToken(t){ try{sessionStorage.setItem('aura_admin_token',t);}catch{} TOKEN=t; }
+function loadToken(){ try{return sessionStorage.getItem('aura_admin_token')||'';}catch{return '';} }
+function clearToken(){ try{sessionStorage.removeItem('aura_admin_token');}catch{} TOKEN=''; }
+
+function authHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};
+}
+
+/* ── Toast ────────────────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast show '+(type==='error'?'error':'success');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.className='toast',2800);
+}
+
+/* ── Login ────────────────────────────────────────────────────────────────── */
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginErr');
+  const btn=document.getElementById('loginBtn');
+  errEl.style.display='none';
+  btn.disabled=true; btn.textContent='Signing in…';
+
+  try{
+    const res=await fetch(API+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pass})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Login failed');
+    saveToken(data.token);
+    document.getElementById('topbarUser').textContent=email;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    loadAnalytics();
+  }catch(e){
+    errEl.textContent=e.message;
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='Sign in';
+  }
+}
+
+function signOut(){
+  clearToken();
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+/* ── Panel switching ──────────────────────────────────────────────────────── */
+function switchPanel(id, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+
+  if(id==='analytics')  loadAnalytics();
+  if(id==='pricing')    loadPricing();
+  if(id==='chatbot')    loadChatbot();
+}
+
+/* ── Analytics ────────────────────────────────────────────────────────────── */
+async function loadAnalytics(){
+  document.getElementById('analyticsLoading').style.display='flex';
+  document.getElementById('analyticsContent').style.display='none';
+  try{
+    const res=await fetch(API+'/admin/analytics',{headers:authHeaders()});
+    if(res.status===401){signOut();return;}
+    const d=await res.json();
+
+    const total=d.users?.total||0;
+    const byPlan=d.users?.byPlan||{};
+    const spark=byPlan.spark||0, bond=byPlan.bond||0, soul=byPlan.soul||0;
+    const paid=bond+soul;
+    const conv=total>0?Math.round(paid/total*100):0;
+
+    document.getElementById('statTotalUsers').textContent=total.toLocaleString();
+    document.getElementById('statNewUsers').textContent=(d.users?.newLast30Days||0)+' new this month';
+    document.getElementById('statMrr').textContent='$'+(d.revenue?.mrr||0).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+    document.getElementById('statArr').textContent='$'+(d.revenue?.arr||0).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})+' ARR';
+    document.getElementById('statSubs').textContent=(d.subs?.active||0).toLocaleString();
+    document.getElementById('statConv').textContent=conv+'%';
+
+    // Bars
+    const maxBar=Math.max(spark,bond,soul,1);
+    document.getElementById('barSpark').style.width=Math.round(spark/maxBar*100)+'%';
+    document.getElementById('barBond').style.width=Math.round(bond/maxBar*100)+'%';
+    document.getElementById('barSoul').style.width=Math.round(soul/maxBar*100)+'%';
+    document.getElementById('cntSpark').textContent=spark;
+    document.getElementById('cntBond').textContent=bond;
+    document.getElementById('cntSoul').textContent=soul;
+
+    document.getElementById('analyticsTs').textContent='Last updated '+new Date().toLocaleTimeString();
+    document.getElementById('stripeWarning').style.display=d.stripe?.available?'none':'block';
+
+    document.getElementById('analyticsLoading').style.display='none';
+    document.getElementById('analyticsContent').style.display='block';
+  }catch(e){
+    document.getElementById('analyticsLoading').innerHTML='<span style="color:var(--red)">Failed to load analytics — '+e.message+'</span>';
+  }
+}
+
+/* ── Pricing ──────────────────────────────────────────────────────────────── */
+async function loadPricing(){
+  document.getElementById('pricingLoading').style.display='flex';
+  document.getElementById('pricingContent').style.display='none';
+  const cfg=await fetchConfig();
+  if(!cfg)return;
+  document.getElementById('bondMonthly').value=cfg.bond_monthly_price||'';
+  document.getElementById('bondAnnual').value=cfg.bond_annual_price||'';
+  document.getElementById('bondPriceId').value=cfg.bond_stripe_price_id||'';
+  document.getElementById('soulMonthly').value=cfg.soul_monthly_price||'';
+  document.getElementById('soulAnnual').value=cfg.soul_annual_price||'';
+  document.getElementById('soulPriceId').value=cfg.soul_stripe_price_id||'';
+  document.getElementById('pricingLoading').style.display='none';
+  document.getElementById('pricingContent').style.display='block';
+}
+
+async function savePlan(plan){
+  const updates = plan==='bond' ? {
+    bond_monthly_price: document.getElementById('bondMonthly').value,
+    bond_annual_price:  document.getElementById('bondAnnual').value,
+    bond_stripe_price_id: document.getElementById('bondPriceId').value,
+  } : {
+    soul_monthly_price: document.getElementById('soulMonthly').value,
+    soul_annual_price:  document.getElementById('soulAnnual').value,
+    soul_stripe_price_id: document.getElementById('soulPriceId').value,
+  };
+  await saveConfig(updates, plan[0].toUpperCase()+plan.slice(1)+' plan saved');
+}
+
+/* ── Chatbot ──────────────────────────────────────────────────────────────── */
+async function loadChatbot(){
+  document.getElementById('chatbotLoading').style.display='flex';
+  document.getElementById('chatbotContent').style.display='none';
+  const cfg=await fetchConfig();
+  if(!cfg)return;
+  document.getElementById('cfgSystemPrefix').value=cfg.chatbot_system_prefix||'';
+  document.getElementById('cfgWelcome').value=cfg.chatbot_welcome_message||'';
+  document.getElementById('cfgModel').value=cfg.chatbot_model_override||'';
+  document.getElementById('cfgMaxTokens').value=cfg.chatbot_max_tokens||'';
+  const temp=cfg.chatbot_temperature!=null?cfg.chatbot_temperature:0.7;
+  document.getElementById('cfgTemperature').value=temp;
+  document.getElementById('tempVal').textContent=parseFloat(temp).toFixed(2);
+  document.getElementById('cfgHistoryDepth').value=cfg.chatbot_history_depth||'';
+  document.getElementById('cfgLimitSpark').value=cfg.chatbot_limit_spark||'';
+  document.getElementById('cfgLimitBond').value=cfg.chatbot_limit_bond||'';
+  document.getElementById('cfgLimitSoul').value=cfg.chatbot_limit_soul||'';
+  document.getElementById('cfgLimitGuest').value=cfg.chatbot_limit_guest||'';
+  document.getElementById('cfgSafetyLevel').value=cfg.chatbot_safety_level||'standard';
+  updateCostEstimate();
+  document.getElementById('chatbotLoading').style.display='none';
+  document.getElementById('chatbotContent').style.display='block';
+}
+
+async function saveChatbot(){
+  const btn=document.getElementById('saveChatbotBtn');
+  btn.disabled=true;
+  await saveConfig({
+    chatbot_system_prefix:   document.getElementById('cfgSystemPrefix').value,
+    chatbot_welcome_message: document.getElementById('cfgWelcome').value,
+    chatbot_model_override:  document.getElementById('cfgModel').value,
+    chatbot_max_tokens:      document.getElementById('cfgMaxTokens').value,
+    chatbot_temperature:     document.getElementById('cfgTemperature').value,
+    chatbot_history_depth:   document.getElementById('cfgHistoryDepth').value,
+    chatbot_limit_spark:     document.getElementById('cfgLimitSpark').value,
+    chatbot_limit_bond:      document.getElementById('cfgLimitBond').value,
+    chatbot_limit_soul:      document.getElementById('cfgLimitSoul').value,
+    chatbot_limit_guest:     document.getElementById('cfgLimitGuest').value,
+    chatbot_safety_level:    document.getElementById('cfgSafetyLevel').value,
+  },'Chatbot settings saved');
+  btn.disabled=false;
+}
+
+/* ── Config fetch/save helpers ────────────────────────────────────────────── */
+async function fetchConfig(){
+  try{
+    const res=await fetch(API+'/admin/config',{headers:authHeaders()});
+    if(res.status===401){signOut();return null;}
+    return await res.json();
+  }catch(e){
+    showToast('Failed to load config: '+e.message,'error');
+    return null;
+  }
+}
+
+async function saveConfig(updates, successMsg){
+  try{
+    const res=await fetch(API+'/admin/config',{method:'PUT',headers:authHeaders(),body:JSON.stringify(updates)});
+    if(res.status===401){signOut();return;}
+    if(!res.ok) throw new Error((await res.json()).error||'Save failed');
+    showToast('✓ '+successMsg);
+  }catch(e){
+    showToast(e.message,'error');
+  }
+}
+
+/* ── Boot ─────────────────────────────────────────────────────────────────── */
+(function init(){
+  TOKEN=loadToken();
+  if(TOKEN){
+    // Validate token by attempting a quick fetch; if 401, stay on login
+    fetch(API+'/admin/config',{headers:authHeaders()}).then(r=>{
+      if(r.ok){
+        // Token still valid — skip login
+        const stored=sessionStorage.getItem('aura_admin_email')||'';
+        document.getElementById('topbarUser').textContent=stored;
+        document.getElementById('login-screen').style.display='none';
+        document.getElementById('app').style.display='flex';
+        loadAnalytics();
+      } else {
+        clearToken();
+      }
+    }).catch(()=>{});
+  }
+
+  // Enter key on login form
+  ['loginEmail','loginPass'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown',e=>{
+      if(e.key==='Enter') doLogin();
+    });
+  });
+
+  // Store email on login for display after reload
+  document.getElementById('loginBtn').addEventListener('click',()=>{
+    const e=document.getElementById('loginEmail').value;
+    try{sessionStorage.setItem('aura_admin_email',e);}catch{}
+  });
+})();
+</script>
+</body>
+</html>

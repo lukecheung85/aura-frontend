@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Files NOT for the frontend repo
+aura-backend/
+node_modules/
+routes/
+server.js
+package.json
+package-lock.json
+.env
+.env.example
+aura-setup.sh
+avatars.jsx
+tweaks-panel.jsx
+"aura copy.html"
+aura-companion.html
+
+# Docs (keep locally, not needed on Vercel)
+AUTH_SETUP.md
+AUTH_TROUBLESHOOTING.md
+MBTI_AND_ORBS.md
+OAUTH_QUICK_START.md
+OAUTH_SETUP.md
+SETUP_AUTH_WORKING.md
+SETUP_SUMMARY.md
+SIMPLE_AUTH_BACKUP.md
+USER_AGREEMENT.md
+debugging-log.md
+aura-launch-guide.html
