@@ -321,6 +321,22 @@
   .section-reveal.in-view {
     opacity: 1;
   }
+
+  /* ── Mobile: nav always shows a subtle glass background ── */
+  @media (max-width: 1023px) {
+    .nav-pill {
+      background: color-mix(in oklch, var(--bg) 88%, transparent);
+      -webkit-backdrop-filter: saturate(140%) blur(14px);
+      backdrop-filter: saturate(140%) blur(14px);
+      border: 1px solid color-mix(in oklch, var(--ink) 8%, transparent);
+    }
+  }
+
+  /* ── Pricing GROWS: responsive font size ── */
+  .grows-word { font-size: clamp(34px, 10vw, 85px); line-height: 1; }
+
+  /* ── Global horizontal overflow guard ── */
+  html, body { overflow-x: hidden; }
 </style>
 </head>
 <body>
@@ -2609,6 +2625,15 @@ const I = {
       d: "M4 18h16"
     }))
   })),
+  LogOut: p => /*#__PURE__*/React.createElement(Icon, _extends({}, p, {
+    d: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
+      d: "M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
+    }), /*#__PURE__*/React.createElement("polyline", {
+      points: "16 17 21 12 16 7"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "21", y1: "12", x2: "9", y2: "12"
+    }))
+  })),
   Heart: p => /*#__PURE__*/React.createElement(Icon, _extends({}, p, {
     d: /*#__PURE__*/React.createElement("path", {
       d: "M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
@@ -3109,7 +3134,7 @@ function Nav({
   }, /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-[1240px] px-5 transition-all"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between rounded-2xl px-4 md:px-5 py-2.5 transition-all " + (scrolled ? "glass" : "")
+    className: "flex items-center justify-between rounded-2xl px-4 md:px-5 py-2.5 nav-pill transition-all " + (scrolled ? "glass" : "")
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => window.scrollTo({
       top: 0,
@@ -3156,12 +3181,20 @@ function Nav({
     key: l.id,
     onClick: () => scrollTo(l.id),
     className: "text-left px-4 py-3 rounded-xl hover:bg-soft transition"
-  }, l.label)), /*#__PURE__*/React.createElement("button", {
+  }, l.label)), /*#__PURE__*/React.createElement("div", {
+    className: "border-t border-line mt-1 pt-1"
+  }, authUser ? /*#__PURE__*/React.createElement("button", {
+    onClick: () => { onSignOut(); setOpenMobile(false); },
+    className: "w-full text-left px-4 py-3 rounded-xl hover:bg-soft transition flex items-center gap-2 ink-soft"
+  }, /*#__PURE__*/React.createElement(I.LogOut, { size: 15 }), userLabel, " \xB7 Sign out") : /*#__PURE__*/React.createElement("button", {
+    onClick: () => { onOpenModal(); setOpenMobile(false); },
+    className: "w-full text-left px-4 py-3 rounded-xl hover:bg-soft transition ink-soft"
+  }, "Sign in"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setTheme(theme === "dark" ? "light" : "dark");
       setOpenMobile(false);
     },
-    className: "text-left px-4 py-3 rounded-xl hover:bg-soft transition flex items-center gap-2"
+    className: "w-full text-left px-4 py-3 rounded-xl hover:bg-soft transition flex items-center gap-2"
   }, theme === "dark" ? /*#__PURE__*/React.createElement(I.Sun, {
     size: 16
   }) : /*#__PURE__*/React.createElement(I.Moon, {
@@ -3180,7 +3213,7 @@ function Hero({
   return /*#__PURE__*/React.createElement("section", {
     id: "product",
     "data-screen-label": "Hero",
-    className: "relative pt-32 md:pt-40 pb-20 overflow-hidden"
+    className: "relative pt-28 sm:pt-32 md:pt-40 pb-16 md:pb-20 overflow-hidden"
   }, /*#__PURE__*/React.createElement(SectionAurora, {
     h1: "var(--hue-a)",
     h2: "var(--hue-b)",
@@ -3212,7 +3245,7 @@ function Hero({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
-    className: "text-[44px] md:text-[80px] leading-[0.98] tracking-[-0.035em] font-semibold max-w-[14ch]"
+    className: "text-[34px] sm:text-[44px] md:text-[80px] leading-[0.98] tracking-[-0.035em] font-semibold max-w-[14ch]"
   }, ["AI", "companions", "that", "actually", "remember", "you."].map((w, i) => /*#__PURE__*/React.createElement("span", {
     key: i,
     className: "word mr-3",
@@ -3222,7 +3255,7 @@ function Hero({
   }, i === 4 ? /*#__PURE__*/React.createElement("span", {
     className: "grad-text font-serif italic"
   }, w) : w))), /*#__PURE__*/React.createElement("p", {
-    className: "mt-8 text-[18px] md:text-[20px] ink-soft max-w-[52ch] leading-[1.5]",
+    className: "mt-6 text-[15px] md:text-[20px] ink-soft md:max-w-[52ch] leading-[1.6]",
     style: {
       animation: "word-in .8s cubic-bezier(.2,.7,.2,1) .7s forwards",
       opacity: 0
@@ -3251,7 +3284,7 @@ function Hero({
       opacity: 0
     }
   }, "Free forever \xB7 No card \xB7 Premium from $18/mo")), /*#__PURE__*/React.createElement("div", {
-    className: "relative h-[460px] md:h-[520px]",
+    className: "hidden lg:block lg:relative lg:h-[520px]",
     style: {
       animation: "word-in .9s cubic-bezier(.2,.7,.2,1) .9s forwards",
       opacity: 0
@@ -3380,7 +3413,7 @@ function FeaturedCompanions({
   return /*#__PURE__*/React.createElement("section", {
     id: "companions",
     "data-screen-label": "Companions",
-    className: "relative py-24 md:py-32 tint-violet border-y border-line overflow-hidden"
+    className: "relative py-14 md:py-32 tint-violet border-y border-line overflow-hidden"
   }, /*#__PURE__*/React.createElement(SectionAurora, {
     h1: "var(--hue-b)",
     h2: "var(--hue-a)",
@@ -3408,7 +3441,7 @@ function FeaturedCompanions({
   }, "02 \u2014 COMPANIONS"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-end justify-between flex-wrap gap-6 mb-12"
   }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-[40px] md:text-[64px] tracking-[-0.03em] leading-[1] font-semibold max-w-[18ch]"
+    className: "text-[26px] md:text-[64px] tracking-[-0.03em] leading-[1.05] font-semibold max-w-[18ch]"
   }, "No two are alike. ", /*#__PURE__*/React.createElement("span", {
     className: "font-serif italic"
   }, "Pick yours.")), /*#__PURE__*/React.createElement("p", {
@@ -3419,6 +3452,7 @@ function FeaturedCompanions({
     className: "grid md:grid-cols-2 lg:grid-cols-4 gap-5"
   }, companions.map((c, i) => /*#__PURE__*/React.createElement("div", {
     key: c.name,
+    className: "flex justify-center md:block",
     style: {
       animation: `flip-in .6s ease ${i * 0.05}s both`
     }
@@ -3457,7 +3491,7 @@ function HowItWorks() {
   return /*#__PURE__*/React.createElement("section", {
     id: "howitworks",
     "data-screen-label": "How it works",
-    className: "relative py-24 md:py-32 overflow-hidden"
+    className: "relative py-14 md:py-32 overflow-hidden"
   }, /*#__PURE__*/React.createElement(SectionAurora, {
     h1: 40,
     h2: "var(--hue-a)",
@@ -3483,7 +3517,7 @@ function HowItWorks() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "section-num ink-mute mb-3"
   }, "03 \u2014 HOW IT WORKS"), /*#__PURE__*/React.createElement("h2", {
-    className: "text-[40px] md:text-[64px] tracking-[-0.03em] leading-[1] font-semibold max-w-[18ch] mb-14"
+    className: "text-[26px] md:text-[64px] tracking-[-0.03em] leading-[1.05] font-semibold max-w-[18ch] mb-8 md:mb-14"
   }, "Three things that make Aura ", /*#__PURE__*/React.createElement("span", {
     className: "font-serif italic"
   }, "different"), "."), /*#__PURE__*/React.createElement("div", {
@@ -3783,7 +3817,7 @@ function Tuner() {
   return /*#__PURE__*/React.createElement("section", {
     id: "tuner",
     "data-screen-label": "Tuner",
-    className: "relative py-24 md:py-32 tint-mint border-y border-line overflow-hidden"
+    className: "relative py-14 md:py-32 tint-mint border-y border-line overflow-hidden"
   }, /*#__PURE__*/React.createElement(SectionAurora, {
     h1: 155,
     h2: "var(--hue-c)",
@@ -3999,7 +4033,7 @@ function Shop() {
   return /*#__PURE__*/React.createElement("section", {
     id: "shop",
     "data-screen-label": "Shop",
-    className: "relative py-24 md:py-32 tint-rose overflow-hidden"
+    className: "relative py-14 md:py-32 tint-rose overflow-hidden"
   }, /*#__PURE__*/React.createElement(SectionAurora, {
     h1: 10,
     h2: 45,
@@ -4110,7 +4144,7 @@ function Collabs() {
     spots: "1.7k waiting"
   }];
   return /*#__PURE__*/React.createElement("section", {
-    className: "py-24 md:py-32 relative overflow-hidden"
+    className: "py-14 md:py-32 relative overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 -z-10 aura-mesh opacity-40 drift"
   }), /*#__PURE__*/React.createElement("div", {
@@ -4211,7 +4245,7 @@ function Pricing({
   return /*#__PURE__*/React.createElement("section", {
     id: "pricing",
     "data-screen-label": "Pricing",
-    className: "relative py-24 md:py-32 tint-sky border-y border-line overflow-hidden"
+    className: "relative py-14 md:py-32 tint-sky border-y border-line overflow-hidden"
   }, /*#__PURE__*/React.createElement(SectionAurora, {
     h1: 220,
     h2: 200,
@@ -4239,12 +4273,9 @@ function Pricing({
   }, "07 \u2014 PRICING"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap items-end justify-between gap-6 mb-12"
   }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-[40px] md:text-[64px] tracking-[-0.03em] leading-[1] font-semibold max-w-[16ch]"
+    className: "text-[26px] md:text-[64px] tracking-[-0.03em] leading-[1.05] font-semibold max-w-[16ch]"
   }, "Pricing that ", /*#__PURE__*/React.createElement("span", {
-    className: "grad-text",
-    style: {
-      fontSize: "85px"
-    }
+    className: "grad-text grows-word"
   }, "GROWS"), " with the friendship."), /*#__PURE__*/React.createElement("div", {
     className: "text-[13px] ink-mute font-mono"
   }, "Cancel anytime \xB7 Memory exports included")), /*#__PURE__*/React.createElement("div", {
@@ -4308,7 +4339,7 @@ function Pricing({
    ───────────────────────────────────────────── */
 function Testimonials() {
   return /*#__PURE__*/React.createElement("section", {
-    className: "relative py-24 md:py-32 overflow-hidden"
+    className: "relative py-14 md:py-32 overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "blob blob-peach",
     style: {
@@ -4330,7 +4361,7 @@ function Testimonials() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "section-num ink-mute mb-3"
   }, "08 \u2014 VOICES"), /*#__PURE__*/React.createElement("h2", {
-    className: "text-[40px] md:text-[64px] tracking-[-0.03em] leading-[1] font-semibold max-w-[20ch] mb-14"
+    className: "text-[26px] md:text-[64px] tracking-[-0.03em] leading-[1.05] font-semibold max-w-[20ch] mb-8 md:mb-14"
   }, "Real people, real companions, ", /*#__PURE__*/React.createElement("span", {
     className: "font-serif italic"
   }, "real"), " attachments."), /*#__PURE__*/React.createElement("div", {
@@ -4369,7 +4400,7 @@ function Testimonials() {
    ───────────────────────────────────────────── */
 function Faq() {
   return /*#__PURE__*/React.createElement("section", {
-    className: "relative py-24 md:py-32 tint-amber border-y border-line overflow-hidden"
+    className: "relative py-14 md:py-32 tint-amber border-y border-line overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "blob blob-amber",
     style: {
@@ -4391,7 +4422,7 @@ function Faq() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "section-num ink-mute mb-3"
   }, "09 \u2014 QUESTIONS"), /*#__PURE__*/React.createElement("h2", {
-    className: "text-[40px] md:text-[56px] tracking-[-0.03em] leading-[1] font-semibold mb-10"
+    className: "text-[26px] md:text-[56px] tracking-[-0.03em] leading-[1.05] font-semibold mb-8 md:mb-10"
   }, "Frequently asked, ", /*#__PURE__*/React.createElement("span", {
     className: "font-serif italic"
   }, "honestly"), " answered."), /*#__PURE__*/React.createElement("div", {
@@ -4428,7 +4459,7 @@ function CTA({
   }), /*#__PURE__*/React.createElement("div", {
     className: "relative mx-auto max-w-[1240px] px-5"
   }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-[44px] md:text-[80px] tracking-[-0.035em] leading-[0.98] font-semibold max-w-[18ch]"
+    className: "text-[30px] md:text-[80px] tracking-[-0.035em] leading-[0.98] font-semibold max-w-[18ch]"
   }, "Your first companion is ", /*#__PURE__*/React.createElement("span", {
     className: "font-serif italic grad-text"
   }, "free.")), /*#__PURE__*/React.createElement("p", {
@@ -4446,12 +4477,60 @@ function CTA({
   }, "Quick start instead"))));
 }
 function Footer() {
+  const [nlEmail, setNlEmail] = React.useState('');
+  const [nlDone, setNlDone] = React.useState(false);
+  const [nlLoading, setNlLoading] = React.useState(false);
+  function handleNewsletter(e) {
+    e.preventDefault();
+    if (!nlEmail) return;
+    setNlLoading(true);
+    fetch(window.AURA_API_BASE + '/newsletter/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: nlEmail })
+    })
+      .then(r => r.json())
+      .then(() => { setNlLoading(false); setNlDone(true); })
+      .catch(() => { setNlLoading(false); setNlDone(true); });
+  }
   return /*#__PURE__*/React.createElement("footer", {
     className: "border-t border-line py-14"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-[1240px] px-5"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 md:grid-cols-5 gap-10"
+    className: "mb-12 pb-12 border-b border-line flex flex-col md:flex-row md:items-center justify-between gap-8"
+  }, /*#__PURE__*/React.createElement("div", null,
+    /*#__PURE__*/React.createElement("h3", {
+      className: "text-[20px] font-semibold tracking-tight ink"
+    }, "Join our newsletter"),
+    /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-[14px] ink-soft"
+    }, "Access launches, exclusive offers and upcoming events.")
+  ), nlDone
+    ? /*#__PURE__*/React.createElement("div", {
+        className: "inline-flex items-center gap-2 text-[14px] font-medium px-5 py-3 rounded-full",
+        style: { background: "oklch(95% 0.08 150)", color: "oklch(40% 0.18 150)" }
+      }, /*#__PURE__*/React.createElement(I.Check, { size: 15 }), " You’re in!")
+    : /*#__PURE__*/React.createElement("form", {
+        onSubmit: handleNewsletter,
+        className: "flex items-center gap-2 w-full md:w-auto"
+      },
+      /*#__PURE__*/React.createElement("input", {
+        type: "email",
+        required: true,
+        placeholder: "your@email.com",
+        value: nlEmail,
+        onChange: e => setNlEmail(e.target.value),
+        className: "flex-1 md:w-[240px] h-[42px] px-4 rounded-full text-[14px] border border-line bg-soft ink outline-none focus:border-purple-400 transition"
+      }),
+      /*#__PURE__*/React.createElement("button", {
+        type: "submit",
+        disabled: nlLoading,
+        className: "h-[42px] px-5 rounded-full btn-primary text-[14px] font-medium transition whitespace-nowrap"
+      }, nlLoading ? "..." : "Subscribe")
+    )
+  ), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-10"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-span-2"
   }, /*#__PURE__*/React.createElement(Wordmark, {
