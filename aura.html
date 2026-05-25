@@ -3199,7 +3199,7 @@ function Nav({
     size: 16
   }) : /*#__PURE__*/React.createElement(I.Moon, {
     size: 16
-  }), " Switch to ", theme === "dark" ? "light" : "dark"))));
+  }), " Switch to ", theme === "dark" ? "light" : "dark")))));
 }
 
 /* ─────────────────────────────────────────────
@@ -5825,6 +5825,13 @@ function ChatModal({
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
   const [usage, setUsage] = useState(null);
+  const [adminWelcome, setAdminWelcome] = useState('');
+  useEffect(() => {
+    fetch(window.AURA_API_BASE + '/chat/welcome')
+      .then(r => r.json())
+      .then(d => { if (d.message) setAdminWelcome(d.message); })
+      .catch(() => {});
+  }, []);
   const [rememberKey, setRememberKey] = useState(() => {
     try {
       return localStorage.getItem('aura_remember_key') === '1';
@@ -5871,7 +5878,7 @@ function ChatModal({
       Wren: "Hi there. How are you — really?",
       Atlas: "Let's go. What are we working on?"
     };
-    const greeting = GREETINGS[companion.name] || `Hey, I'm ${companion.name}. What's on your mind?`;
+    const greeting = GREETINGS[companion.name] || adminWelcome || `Hey, I'm ${companion.name}. What's on your mind?`;
     const t = setTimeout(() => {
       onUpdateHistory && onUpdateHistory(companion.name, [{
         role: 'assistant',
