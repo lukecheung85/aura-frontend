@@ -5,311 +5,377 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Aura — Coming Soon</title>
 <meta name="description" content="Something special is almost here. Join the Aura waitlist and be the first to know when we launch." />
+<script>window.AURA_API_BASE = 'https://auracompanion-production.up.railway.app/api';</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── Design tokens (exact match to aura.html) ─────────────────────────── */
   :root {
-    --bg:        #ffffff;
-    --bg-soft:   #f7f8fb;
-    --ink:       #0f0e13;
-    --ink-soft:  rgba(15,14,19,.55);
-    --ink-mute:  rgba(15,14,19,.35);
-    --line:      rgba(15,14,19,.08);
-    --accent:    oklch(58% 0.22 280);
-    --accent-b:  oklch(62% 0.19 320);
-    --hue-a: 280; --hue-b: 320; --hue-c: 30;
-    --glass-bg:  rgba(255,255,255,.72);
-    --glass-brd: rgba(255,255,255,.5);
+    --bg:       #ffffff;
+    --bg-soft:  #f7f8fb;
+    --ink:      #0a0e27;
+    --ink-soft: #3d4663;
+    --ink-mute: #6b7390;
+    --line:     #e6e8f0;
+    --hue-a: 280;
+    --hue-b: 320;
+    --hue-c: 30;
+  }
+  html.dark {
+    --bg:       #0a0e27;
+    --bg-soft:  #11162e;
+    --ink:      #ffffff;
+    --ink-soft: #c9cde3;
+    --ink-mute: #8a91b3;
+    --line:     #1f2547;
   }
 
   html, body {
     min-height: 100vh;
-    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
     background: var(--bg);
     color: var(--ink);
-    overflow-x: hidden;
+    font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+    overflow-x: hidden;
   }
 
-  /* ── Aurora bg ── */
-  .aurora-bg {
+  /* ── Grain texture (same as aura.html) ─────────────────────────────────── */
+  .grain::after {
+    content: "";
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    overflow: hidden;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity: .35; mix-blend-mode: overlay;
   }
-  .aurora-bg::before, .aurora-bg::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: drift 18s ease-in-out infinite alternate;
-  }
-  .aurora-bg::before {
-    width: 900px; height: 700px;
-    top: -200px; left: -150px;
-    background: radial-gradient(ellipse, oklch(72% 0.22 var(--hue-a)) 0%, oklch(60% 0.18 var(--hue-b)) 60%, transparent 100%);
-  }
-  .aurora-bg::after {
-    width: 700px; height: 600px;
-    bottom: -100px; right: -100px;
-    background: radial-gradient(ellipse, oklch(78% 0.18 var(--hue-c)) 0%, oklch(65% 0.16 var(--hue-b)) 60%, transparent 100%);
-    animation-delay: -9s; animation-duration: 22s;
-  }
-  .aurora-orb {
-    position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.25;
-    animation: drift2 25s ease-in-out infinite alternate;
-  }
-  .aurora-orb-1 {
-    width: 500px; height: 400px;
-    top: 30%; left: 60%;
-    background: radial-gradient(ellipse, oklch(68% 0.24 var(--hue-c)) 0%, transparent 70%);
-  }
-  @keyframes drift  { from { transform: translate(0,0) scale(1); } to { transform: translate(60px,40px) scale(1.08); } }
-  @keyframes drift2 { from { transform: translate(0,0) rotate(0deg); } to { transform: translate(-40px,30px) rotate(20deg); } }
 
-  /* ── Layout ── */
+  /* ── Aurora background (exact match to aura.html) ──────────────────────── */
+  @keyframes au1 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    25%     { transform: translate(8vw,-5vh) scale(1.12); }
+    50%     { transform: translate(-6vw,9vh) scale(0.94); }
+    75%     { transform: translate(5vw,4vh) scale(1.07); }
+  }
+  @keyframes au2 {
+    0%,100% { transform: translate(0,0) scale(1.04); }
+    33%     { transform: translate(-9vw,7vh) scale(0.91); }
+    66%     { transform: translate(8vw,-9vh) scale(1.11); }
+  }
+  @keyframes au3 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    40%     { transform: translate(10vw,8vh) scale(1.14); }
+    80%     { transform: translate(-7vw,-6vh) scale(0.9); }
+  }
+  @keyframes au4 {
+    0%,100% { transform: translate(0,0) scale(1.06); }
+    50%     { transform: translate(-9vw,-10vh) scale(0.93); }
+  }
+  .aurora-bg {
+    position: fixed; inset: 0;
+    overflow: hidden; pointer-events: none; z-index: 0;
+  }
+  .aurora-blob { position: absolute; border-radius: 50%; filter: blur(100px); will-change: transform; }
+  .aurora-blob-1 {
+    width: 70vw; height: 70vw; left: -15vw; top: -25vh;
+    background: oklch(88% 0.13 340); opacity: 0.30;
+    animation: au1 6.5s ease-in-out infinite;
+  }
+  .aurora-blob-2 {
+    width: 60vw; height: 60vw; right: -12vw; top: -8vh;
+    background: oklch(84% 0.11 280); opacity: 0.28;
+    animation: au2 8.5s ease-in-out infinite;
+  }
+  .aurora-blob-3 {
+    width: 55vw; height: 55vw; left: -8vw; bottom: -8vh;
+    background: oklch(89% 0.09 215); opacity: 0.25;
+    animation: au3 7.5s ease-in-out infinite;
+  }
+  .aurora-blob-4 {
+    width: 48vw; height: 48vw; right: 2vw; bottom: -12vh;
+    background: oklch(90% 0.09 48); opacity: 0.20;
+    animation: au4 10s ease-in-out infinite;
+  }
+  html.dark .aurora-blob-1 { background: oklch(54% 0.23 188); opacity: 0.40; }
+  html.dark .aurora-blob-2 { background: oklch(48% 0.25 292); opacity: 0.42; }
+  html.dark .aurora-blob-3 { background: oklch(44% 0.21 248); opacity: 0.34; }
+  html.dark .aurora-blob-4 { background: oklch(50% 0.19 330); opacity: 0.28; }
+
+  /* ── Glass (exact match to aura.html) ──────────────────────────────────── */
+  .glass {
+    background: color-mix(in oklch, var(--bg) 70%, transparent);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    backdrop-filter: saturate(140%) blur(14px);
+    border: 1px solid color-mix(in oklch, var(--ink) 8%, transparent);
+  }
+
+  /* ── Buttons (exact match to aura.html) ────────────────────────────────── */
+  .btn-primary {
+    background: linear-gradient(180deg, oklch(58% 0.22 var(--hue-a)) 0%, oklch(48% 0.24 var(--hue-a)) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 20px -8px oklch(50% 0.24 var(--hue-a) / .8);
+    color: white;
+  }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-ghost {
+    border: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-ghost:hover { background: color-mix(in oklch, var(--ink) 5%, transparent); }
+
+  /* ── Grad text (exact match) ────────────────────────────────────────────── */
+  .grad-text {
+    background: linear-gradient(90deg, oklch(60% 0.24 var(--hue-a)), oklch(70% 0.2 var(--hue-b)), oklch(72% 0.18 var(--hue-c)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ── Word reveal animation (same as aura.html) ─────────────────────────── */
+  @keyframes word-in {
+    from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+    to   { opacity: 1; transform: none; filter: none; }
+  }
+
+  /* ── Status dot pulse ──────────────────────────────────────────────────── */
+  @keyframes ping-soft {
+    0% { transform: scale(0.9); opacity: .6; }
+    80%,100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  /* ── Page layout ────────────────────────────────────────────────────────── */
   .page {
     position: relative; z-index: 1;
     min-height: 100vh;
     display: flex; flex-direction: column;
   }
 
+  /* ── Header ─────────────────────────────────────────────────────────────── */
   header {
     padding: 24px 32px;
     display: flex; align-items: center; justify-content: space-between;
   }
+  @media (max-width: 600px) { header { padding: 20px; } }
+
   .wordmark {
     display: flex; align-items: center; gap: 8px;
-    font-size: 20px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink);
-    text-decoration: none;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--ink); text-decoration: none;
   }
-  .wordmark-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: linear-gradient(135deg, oklch(58% 0.22 var(--hue-a)), oklch(62% 0.19 var(--hue-b)));
-    display: inline-block; margin-right: 2px;
-  }
-  .status-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 100px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--line);
-    font-size: 12px; font-weight: 500; color: var(--ink-soft);
-  }
-  .status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: oklch(68% 0.2 150);
-    box-shadow: 0 0 0 0 oklch(68% 0.2 150);
-    animation: pulse-dot 2s infinite;
-  }
-  @keyframes pulse-dot {
-    0%   { box-shadow: 0 0 0 0 oklch(68% 0.2 150 / 0.5); }
-    70%  { box-shadow: 0 0 0 7px oklch(68% 0.2 150 / 0); }
-    100% { box-shadow: 0 0 0 0 oklch(68% 0.2 150 / 0); }
+  .wordmark-orb {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: conic-gradient(from 220deg at 50% 50%,
+      oklch(78% 0.18 var(--hue-b)),
+      oklch(78% 0.18 var(--hue-a)),
+      oklch(82% 0.18 60),
+      oklch(78% 0.18 var(--hue-c)),
+      oklch(78% 0.18 var(--hue-b)));
+    flex-shrink: 0;
   }
 
-  /* ── Hero ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 14px; border-radius: 100px;
+    font-size: 12px; font-weight: 500;
+    color: var(--ink-soft);
+  }
+  .status-dot-wrap {
+    position: relative; width: 8px; height: 8px;
+    display: grid; place-items: center;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: oklch(68% 0.2 150);
+    position: absolute; inset: 0;
+  }
+  .status-dot-ring {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: oklch(68% 0.2 150);
+    position: absolute; inset: 0;
+    animation: ping-soft 2.4s cubic-bezier(0,0,.2,1) infinite;
+  }
+
+  /* ── Main content ───────────────────────────────────────────────────────── */
   main {
     flex: 1;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 60px 24px 80px;
+    padding: 48px 24px 80px;
     text-align: center;
   }
+
+  /* ── Hero text ──────────────────────────────────────────────────────────── */
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 14px; border-radius: 100px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--line);
     font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: var(--ink-soft);
     margin-bottom: 28px;
-    text-transform: uppercase;
+    opacity: 0;
+    animation: word-in .6s ease .05s forwards;
   }
+
   .hero-heading {
-    font-size: clamp(40px, 8vw, 88px);
+    font-size: clamp(38px, 7.5vw, 84px);
     font-weight: 700;
     letter-spacing: -0.04em;
     line-height: 0.95;
-    max-width: 14ch;
-    margin: 0 auto 24px;
+    max-width: 13ch;
+    margin: 0 auto 22px;
+    opacity: 0;
+    animation: word-in .7s ease .1s forwards;
   }
-  .grad-text {
-    background: linear-gradient(135deg,
-      oklch(58% 0.22 var(--hue-a)) 0%,
-      oklch(62% 0.19 var(--hue-b)) 50%,
-      oklch(65% 0.2 var(--hue-c)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .italic-serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
-  .hero-sub {
-    font-size: clamp(15px, 2vw, 18px);
-    color: var(--ink-soft);
-    max-width: 48ch;
-    line-height: 1.65;
-    margin: 0 auto 48px;
+  .italic-serif {
+    font-family: 'Instrument Serif', 'Times New Roman', serif;
+    font-style: italic; font-weight: 400;
   }
 
-  /* ── Cards ── */
+  .hero-sub {
+    font-size: clamp(15px, 1.8vw, 17px);
+    color: var(--ink-soft);
+    max-width: 46ch;
+    line-height: 1.65;
+    margin: 0 auto 52px;
+    opacity: 0;
+    animation: word-in .7s ease .17s forwards;
+  }
+
+  /* ── Cards wrapper ──────────────────────────────────────────────────────── */
   .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
     width: 100%;
-    max-width: 720px;
+    max-width: 480px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    opacity: 0;
+    animation: word-in .7s ease .24s forwards;
   }
-  @media (max-width: 640px) {
-    .cards { grid-template-columns: 1fr; }
-    header { padding: 20px; }
-  }
+
   .card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(18px);
-    border: 1px solid var(--glass-brd);
     border-radius: 20px;
-    padding: 28px;
+    padding: 28px 30px;
     text-align: left;
-    box-shadow: 0 4px 24px rgba(0,0,0,.06);
   }
-  .card-full { grid-column: 1 / -1; }
+
   .card-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
-    text-transform: uppercase; color: var(--ink-mute);
-    margin-bottom: 16px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 14px;
   }
   .card h3 {
-    font-size: 18px; font-weight: 600; letter-spacing: -0.02em;
+    font-size: 17px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--ink);
     margin-bottom: 6px;
   }
   .card p {
-    font-size: 14px; color: var(--ink-soft); line-height: 1.6;
-    margin-bottom: 18px;
+    font-size: 14px; color: var(--ink-soft);
+    line-height: 1.6; margin-bottom: 18px;
   }
 
-  /* ── Forms ── */
-  .input-row {
-    display: flex; gap: 8px; flex-wrap: wrap;
-  }
+  /* ── Form elements ──────────────────────────────────────────────────────── */
+  .input-row { display: flex; gap: 8px; }
   .inp {
     flex: 1; min-width: 0;
-    height: 44px;
-    padding: 0 16px;
+    height: 44px; padding: 0 16px;
     border-radius: 100px;
     border: 1.5px solid var(--line);
-    background: rgba(255,255,255,.6);
+    background: color-mix(in oklch, var(--bg) 85%, transparent);
     font-family: inherit; font-size: 14px; color: var(--ink);
     outline: none;
     transition: border-color .15s;
   }
   .inp::placeholder { color: var(--ink-mute); }
   .inp:focus { border-color: oklch(58% 0.22 var(--hue-a)); }
-  .inp-full { width: 100%; border-radius: 12px; margin-bottom: 10px; }
+  .inp-block {
+    display: block; width: 100%;
+    border-radius: 12px; margin-bottom: 10px;
+    height: 44px; padding: 0 16px;
+    border: 1.5px solid var(--line);
+    background: color-mix(in oklch, var(--bg) 85%, transparent);
+    font-family: inherit; font-size: 14px; color: var(--ink);
+    outline: none; transition: border-color .15s;
+  }
+  .inp-block::placeholder { color: var(--ink-mute); }
+  .inp-block:focus { border-color: oklch(58% 0.22 var(--hue-a)); }
+
   .btn {
-    height: 44px;
-    padding: 0 20px;
-    border-radius: 100px;
-    border: none; cursor: pointer;
-    font-family: inherit; font-size: 14px; font-weight: 600;
-    transition: opacity .15s, transform .1s;
+    height: 44px; padding: 0 20px;
+    border-radius: 100px; border: none;
+    cursor: pointer; font-family: inherit;
+    font-size: 14px; font-weight: 600;
+    transition: filter .15s, transform .1s;
     white-space: nowrap;
   }
-  .btn:hover { opacity: .88; }
-  .btn:active { transform: scale(.97); }
-  .btn-primary {
-    background: linear-gradient(135deg, oklch(58% 0.22 var(--hue-a)), oklch(62% 0.19 var(--hue-b)));
-    color: #fff;
-  }
-  .btn-ghost {
-    background: rgba(15,14,19,.06);
-    color: var(--ink);
-  }
-  .btn-full { width: 100%; border-radius: 12px; }
   .btn:disabled { opacity: .5; cursor: not-allowed; }
-
-  /* ── Divider ── */
-  .divider {
-    display: flex; align-items: center; gap: 10px;
-    margin: 14px 0;
-    color: var(--ink-mute); font-size: 12px;
+  .btn:active:not(:disabled) { transform: scale(.97); }
+  .btn-block {
+    width: 100%; border-radius: 12px;
+    height: 44px; border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    transition: filter .15s, transform .1s;
+    margin-top: 4px;
   }
-  .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--line);
-  }
+  .btn-block:disabled { opacity: .5; cursor: not-allowed; }
 
-  /* ── Message states ── */
+  /* ── Utility states ─────────────────────────────────────────────────────── */
   .msg-success {
     display: flex; align-items: center; gap: 8px;
-    padding: 10px 16px; border-radius: 10px;
-    background: oklch(95% 0.08 150); color: oklch(36% 0.18 150);
+    padding: 10px 14px; border-radius: 10px;
+    background: oklch(95% 0.08 150);
+    color: oklch(36% 0.18 150);
     font-size: 14px; font-weight: 500;
   }
   .msg-error {
-    padding: 10px 16px; border-radius: 10px;
-    background: oklch(95% 0.06 20); color: oklch(40% 0.18 20);
+    padding: 9px 14px; border-radius: 10px;
+    background: oklch(95% 0.06 20);
+    color: oklch(40% 0.18 20);
     font-size: 13px; margin-top: 8px;
   }
   .hidden { display: none !important; }
 
-  /* ── Tester credentials table ── */
-  .creds-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 4px; font-size: 13px; font-family: ui-monospace, monospace;
+  .logged-in-bar {
+    padding: 12px 14px;
+    background: oklch(95% 0.06 150);
+    border-radius: 12px;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
   }
-  .cred-row {
-    display: contents;
+  .logged-in-bar span {
+    font-size: 14px; font-weight: 500;
+    color: oklch(36% 0.18 150);
   }
-  .cred-cell {
-    padding: 5px 10px; border-radius: 6px;
-    background: rgba(15,14,19,.04);
-    color: var(--ink-soft);
-  }
-  .cred-cell:first-child {
-    color: oklch(48% 0.18 var(--hue-a));
-    font-weight: 600;
+  .btn-sm {
+    height: 36px; padding: 0 16px;
+    border-radius: 100px; border: none;
+    cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600;
+    transition: filter .15s;
   }
 
-  /* ── Footer ── */
+  /* ── Footer ─────────────────────────────────────────────────────────────── */
   footer {
-    padding: 24px 32px;
+    position: relative; z-index: 1;
+    padding: 22px 32px;
     text-align: center;
     font-size: 12px; color: var(--ink-mute);
     border-top: 1px solid var(--line);
-    position: relative; z-index: 1;
   }
-
-  /* ── Login state ── */
-  .logged-in-bar {
-    padding: 12px 16px;
-    background: oklch(95% 0.06 150);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    font-size: 14px;
-  }
-  .logged-in-bar span { color: oklch(36% 0.18 150); font-weight: 500; }
-
-  /* animation */
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .badge { animation: fade-up .5s ease forwards; }
-  .hero-heading { animation: fade-up .6s .07s ease both; }
-  .hero-sub { animation: fade-up .6s .14s ease both; }
-  .cards { animation: fade-up .6s .2s ease both; }
 </style>
 </head>
-<body>
+<body class="grain">
 
+<!-- Aurora background (identical to aura.html) -->
 <div class="aurora-bg">
-  <div class="aurora-orb aurora-orb-1"></div>
+  <div class="aurora-blob aurora-blob-1"></div>
+  <div class="aurora-blob aurora-blob-2"></div>
+  <div class="aurora-blob aurora-blob-3"></div>
+  <div class="aurora-blob aurora-blob-4"></div>
 </div>
 
 <div class="page">
@@ -317,17 +383,22 @@
   <!-- Header -->
   <header>
     <a class="wordmark" href="/">
-      <span class="wordmark-dot"></span>Aura
+      <div class="wordmark-orb"></div>
+      Aura
     </a>
-    <div class="status-pill">
-      <span class="status-dot"></span>
+    <div class="status-pill glass">
+      <div class="status-dot-wrap">
+        <span class="status-dot-ring"></span>
+        <span class="status-dot"></span>
+      </div>
       Almost ready
     </div>
   </header>
 
-  <!-- Hero -->
+  <!-- Hero + cards -->
   <main>
-    <div class="badge">✦ &nbsp;Coming soon</div>
+
+    <div class="badge glass">✦ &nbsp;Coming soon</div>
 
     <h1 class="hero-heading">
       Something<br>
@@ -337,17 +408,16 @@
 
     <p class="hero-sub">
       Aura is a new kind of AI companion — one with memory, personality, and the ability to
-      pick up exactly where you left off. We're putting the finishing touches on it now.
+      pick up exactly where you left off. We're putting the finishing touches on now.
     </p>
 
-    <!-- Cards -->
     <div class="cards">
 
-      <!-- Newsletter card -->
-      <div class="card">
+      <!-- Newsletter — centred, full width -->
+      <div class="card glass">
         <div class="card-label">Stay in the loop</div>
         <h3>Get early access</h3>
-        <p>Be first to know when Aura launches — plus exclusive launch offers.</p>
+        <p>Be first to know when Aura launches — plus exclusive launch offers for subscribers.</p>
 
         <div id="nl-form-wrap">
           <div class="input-row">
@@ -361,108 +431,79 @@
         </div>
       </div>
 
-      <!-- What's coming card -->
-      <div class="card">
-        <div class="card-label">What's coming</div>
-        <h3>Built for real connection</h3>
-        <p>Companions with distinct personalities, private memory, MBTI matching, and seamless Telegram integration.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <span style="font-size:12px;padding:4px 10px;border-radius:100px;background:rgba(15,14,19,.05);color:var(--ink-soft);">✦ Private memory</span>
-          <span style="font-size:12px;padding:4px 10px;border-radius:100px;background:rgba(15,14,19,.05);color:var(--ink-soft);">✦ MBTI matcher</span>
-          <span style="font-size:12px;padding:4px 10px;border-radius:100px;background:rgba(15,14,19,.05);color:var(--ink-soft);">✦ Telegram</span>
-          <span style="font-size:12px;padding:4px 10px;border-radius:100px;background:rgba(15,14,19,.05);color:var(--ink-soft);">✦ 8 companions</span>
-        </div>
-      </div>
-
-      <!-- Tester login card (full width) -->
-      <div class="card card-full">
+      <!-- Tester login -->
+      <div class="card glass">
         <div class="card-label">🔐 &nbsp;Tester access</div>
         <h3>Already have a test account?</h3>
-        <p>Sign in below to access the full Aura experience and send us your feedback.</p>
+        <p>Sign in to access the full Aura experience and send us your feedback.</p>
 
         <!-- Logged-in state -->
         <div id="logged-in-bar" class="logged-in-bar hidden">
           <span id="logged-in-label">Signed in</span>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-primary" onclick="goToApp()" style="height:36px;padding:0 16px;font-size:13px;">Open Aura →</button>
-            <button class="btn btn-ghost" onclick="signOut()" style="height:36px;padding:0 14px;font-size:13px;">Sign out</button>
+            <button class="btn-sm btn-primary" onclick="goToApp()">Open Aura →</button>
+            <button class="btn-sm btn-ghost" onclick="signOut()">Sign out</button>
           </div>
         </div>
 
         <!-- Login form -->
         <div id="login-form">
-          <input class="inp inp-full" id="l-email" type="email" placeholder="Email" autocomplete="email" />
-          <input class="inp inp-full" id="l-pass"  type="password" placeholder="Password" autocomplete="current-password"
-                 onkeydown="if(event.key==='Enter')signIn()" />
+          <input class="inp-block" id="l-email" type="email" placeholder="Email" autocomplete="email" />
+          <input class="inp-block" id="l-pass" type="password" placeholder="Password"
+                 autocomplete="current-password" onkeydown="if(event.key==='Enter')signIn()" />
           <div id="l-error" class="msg-error hidden"></div>
-          <button class="btn btn-primary btn-full" id="l-btn" onclick="signIn()" style="margin-top:4px;">
-            Sign in to Aura
-          </button>
-          <div class="divider">or use a test account below</div>
-          <div class="creds-grid">
-            <div class="cred-cell">Email</div><div class="cred-cell">Password</div>
-            <div class="cred-cell">tester1@aura.test</div><div class="cred-cell">test1</div>
-            <div class="cred-cell">tester2@aura.test</div><div class="cred-cell">test2</div>
-            <div class="cred-cell">tester3@aura.test</div><div class="cred-cell">test3</div>
-            <div class="cred-cell">tester4@aura.test</div><div class="cred-cell">test4</div>
-            <div class="cred-cell">tester5@aura.test</div><div class="cred-cell">test5</div>
-            <div class="cred-cell">tester6@aura.test</div><div class="cred-cell">test6</div>
-            <div class="cred-cell">tester7@aura.test</div><div class="cred-cell">test7</div>
-            <div class="cred-cell">tester8@aura.test</div><div class="cred-cell">test8</div>
-            <div class="cred-cell">tester9@aura.test</div><div class="cred-cell">test9</div>
-            <div class="cred-cell">tester10@aura.test</div><div class="cred-cell">test10</div>
-          </div>
+          <button class="btn-block btn-primary" id="l-btn" onclick="signIn()">Sign in to Aura</button>
         </div>
       </div>
 
-    </div><!-- /cards -->
+    </div>
   </main>
 
   <footer>
     &copy; 2026 Aura Labs &nbsp;·&nbsp; Memory you control. Conversations that remember.
   </footer>
-</div>
+
+</div><!-- /page -->
 
 <script>
-// ── Config ───────────────────────────────────────────────────────────────────
+// ── Supabase config ──────────────────────────────────────────────────────────
 var SUPA_URL = 'https://jtgaxhucflemgnpfjgbu.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0Z2F4aHVjZmxlbWducGZqZ2J1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMzcwMzAsImV4cCI6MjA5NDgxMzAzMH0.D5f9UViBd6T15Ds2KiE2grkj_Y4YEma_nEJW5KmpmqE';
-var API_BASE = 'https://auracompanion-production.up.railway.app/api';
-var client = null;
+var API_BASE  = window.AURA_API_BASE || 'https://auracompanion-production.up.railway.app/api';
+var _client   = null;
 
 function getClient() {
-  if (!client && typeof supabase !== 'undefined') {
-    client = supabase.createClient(SUPA_URL, SUPA_KEY);
-  }
-  return client;
+  if (!_client && typeof supabase !== 'undefined')
+    _client = supabase.createClient(SUPA_URL, SUPA_KEY);
+  return _client;
 }
 
-// ── Check existing session on load ───────────────────────────────────────────
+// Restore session on load
 window.addEventListener('DOMContentLoaded', function () {
   var c = getClient();
   if (!c) return;
-  c.auth.getSession().then(function(res) {
-    var session = res.data && res.data.session;
-    if (session && session.user) showLoggedIn(session.user);
-  }).catch(function() {});
+  c.auth.getSession().then(function (res) {
+    var s = res.data && res.data.session;
+    if (s && s.user) showLoggedIn(s.user);
+  }).catch(function () {});
 });
 
+// ── Auth state ───────────────────────────────────────────────────────────────
 function showLoggedIn(user) {
-  var email = user.email || 'tester';
-  document.getElementById('logged-in-label').textContent = 'Signed in as ' + email;
+  document.getElementById('logged-in-label').textContent =
+    'Signed in as ' + (user.email || 'tester');
   document.getElementById('logged-in-bar').classList.remove('hidden');
   document.getElementById('login-form').classList.add('hidden');
 }
-
 function showLoggedOut() {
   document.getElementById('logged-in-bar').classList.add('hidden');
   document.getElementById('login-form').classList.remove('hidden');
 }
 
-// ── Newsletter ────────────────────────────────────────────────────────────────
+// ── Newsletter ───────────────────────────────────────────────────────────────
 function subscribeNewsletter() {
-  var email = document.getElementById('nl-email').value.trim();
-  var errEl = document.getElementById('nl-error');
+  var email  = document.getElementById('nl-email').value.trim();
+  var errEl  = document.getElementById('nl-error');
   errEl.classList.add('hidden');
 
   if (!email || !email.includes('@')) {
@@ -470,29 +511,25 @@ function subscribeNewsletter() {
     errEl.classList.remove('hidden');
     return;
   }
-
   var btn = document.getElementById('nl-btn');
-  btn.disabled = true;
-  btn.textContent = '...';
+  btn.disabled = true; btn.textContent = '...';
 
   fetch(API_BASE + '/newsletter/subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email })
   })
-  .then(function(r) { return r.json(); })
-  .then(function() {
+  .then(function () {
     document.getElementById('nl-form-wrap').classList.add('hidden');
     document.getElementById('nl-success').classList.remove('hidden');
   })
-  .catch(function() {
-    // Even on network error, treat as success for UX
+  .catch(function () {
     document.getElementById('nl-form-wrap').classList.add('hidden');
     document.getElementById('nl-success').classList.remove('hidden');
   });
 }
 
-// ── Tester Sign In ────────────────────────────────────────────────────────────
+// ── Sign in ──────────────────────────────────────────────────────────────────
 function signIn() {
   var email = document.getElementById('l-email').value.trim();
   var pass  = document.getElementById('l-pass').value;
@@ -504,42 +541,34 @@ function signIn() {
     errEl.classList.remove('hidden');
     return;
   }
-
   var btn = document.getElementById('l-btn');
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
+  btn.disabled = true; btn.textContent = 'Signing in...';
 
   var c = getClient();
   if (!c) {
-    errEl.textContent = 'Auth service not available. Please refresh and try again.';
+    errEl.textContent = 'Auth unavailable — please refresh and try again.';
     errEl.classList.remove('hidden');
-    btn.disabled = false;
-    btn.textContent = 'Sign in to Aura';
+    btn.disabled = false; btn.textContent = 'Sign in to Aura';
     return;
   }
 
   c.auth.signInWithPassword({ email: email, password: pass })
-    .then(function(res) {
+    .then(function (res) {
       if (res.error) throw res.error;
       showLoggedIn(res.data.user);
-      // Brief pause then redirect
-      setTimeout(goToApp, 800);
+      setTimeout(goToApp, 700);
     })
-    .catch(function(err) {
+    .catch(function (err) {
       errEl.textContent = err.message || 'Invalid email or password.';
       errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Sign in to Aura';
+      btn.disabled = false; btn.textContent = 'Sign in to Aura';
     });
 }
 
-function goToApp() {
-  window.location.href = '/aura';
-}
-
-function signOut() {
+function goToApp()  { window.location.href = '/aura'; }
+function signOut()  {
   var c = getClient();
-  if (c) c.auth.signOut().catch(function() {});
+  if (c) c.auth.signOut().catch(function(){});
   showLoggedOut();
 }
 </script>
