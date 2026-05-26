@@ -337,6 +337,78 @@
 
   /* ── Global horizontal overflow guard ── */
   html, body { overflow-x: hidden; }
+
+  /* ══════════════════════════════════════════
+     MOBILE UI OVERRIDES  (≤ 768px)
+     Applied when user is on a phone/tablet.
+     ══════════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    /* ── Nav: compact header ── */
+    .mob-nav-pill {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+    }
+
+    /* ── Companions mobile carousel ── */
+    /* Hide the desktop grid on mobile */
+    .mob-hide { display: none !important; }
+    /* Show the mobile carousel instead */
+    .mob-comp-carousel { display: block; }
+
+    /* ── Shop mobile 2×2 paged grid ── */
+    .mob-shop-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+    }
+    /* Nav row for paged sections */
+    .mob-nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 0 6px;
+    }
+    .mob-arr {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: color-mix(in oklch, var(--bg) 85%, transparent);
+      backdrop-filter: blur(8px);
+      display: grid; place-items: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .mob-dots { display: flex; gap: 4px; }
+    .mob-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--line);
+      transition: all .3s;
+    }
+    .mob-dot.on {
+      width: 14px;
+      border-radius: 3px;
+      background: oklch(58% 0.22 var(--hue-a));
+    }
+
+    /* ── Customize: avatar above sliders on mobile ── */
+    .mob-cust-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 20px !important;
+    }
+    /* Move avatar panel before sliders panel */
+    .mob-cust-preview { order: -1; }
+    .mob-cust-sliders { order: 1; }
+  }
+
+  /* Desktop: hide mobile-only carousel wrapper */
+  .mob-comp-carousel { display: none; }
 </style>
 </head>
 <body>
@@ -3081,6 +3153,20 @@ function Wordmark({
 }
 
 /* ─────────────────────────────────────────────
+   MOBILE DETECTION HOOK
+   ───────────────────────────────────────────── */
+function useIsMobile() {
+  const [mob, setMob] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = e => setMob(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return mob;
+}
+
+/* ─────────────────────────────────────────────
    NAV
    ───────────────────────────────────────────── */
 function Nav({
@@ -3132,9 +3218,9 @@ function Nav({
   return /*#__PURE__*/React.createElement("header", {
     className: "fixed top-0 left-0 right-0 z-50 transition-all " + (scrolled ? "py-2" : "py-4")
   }, /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto max-w-[1240px] px-5 transition-all"
+    className: "mx-auto max-w-[1240px] px-3 md:px-5 transition-all"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between rounded-2xl px-4 md:px-5 py-2.5 nav-pill transition-all " + (scrolled ? "glass" : "")
+    className: "flex items-center justify-between rounded-2xl px-3 md:px-5 py-2 md:py-2.5 nav-pill mob-nav-pill transition-all " + (scrolled ? "glass" : "")
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => window.scrollTo({
       top: 0,
@@ -3409,7 +3495,13 @@ function FeaturedCompanions({
   companions,
   onOpenChat
 }) {
-  const [pick, setPick] = useState(0);
+  const isMobile = useIsMobile();
+  const [mobPage, setMobPage] = useState(0);
+  const mobPages = [];
+  for (let i = 0; i < companions.length; i += 2) mobPages.push(companions.slice(i, i + 2));
+  const mobAtStart = mobPage === 0;
+  const mobAtEnd = mobPage === mobPages.length - 1;
+
   return /*#__PURE__*/React.createElement("section", {
     id: "companions",
     "data-screen-label": "Companions",
@@ -3420,51 +3512,131 @@ function FeaturedCompanions({
     h3: 320
   }), /*#__PURE__*/React.createElement("div", {
     className: "blob blob-violet",
-    style: {
-      width: 420,
-      height: 420,
-      top: -120,
-      left: -120
-    }
+    style: { width: 420, height: 420, top: -120, left: -120 }
   }), /*#__PURE__*/React.createElement("div", {
     className: "blob blob-rose",
-    style: {
-      width: 360,
-      height: 360,
-      bottom: -100,
-      right: -100
-    }
+    style: { width: 360, height: 360, bottom: -100, right: -100 }
   }), /*#__PURE__*/React.createElement("div", {
     className: "relative mx-auto max-w-[1240px] px-5"
-  }, /*#__PURE__*/React.createElement("div", {
+  },
+  /*#__PURE__*/React.createElement("div", {
     className: "section-num ink-mute mb-3"
-  }, "02 \u2014 COMPANIONS"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-end justify-between flex-wrap gap-6 mb-12"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-[26px] md:text-[64px] tracking-[-0.03em] leading-[1.05] font-semibold max-w-[18ch]"
-  }, "No two are alike. ", /*#__PURE__*/React.createElement("span", {
-    className: "font-serif italic"
-  }, "Pick yours.")), /*#__PURE__*/React.createElement("p", {
-    className: "text-[15px] ink-soft max-w-[44ch] leading-[1.5]"
-  }, "Every companion is the sum of ", /*#__PURE__*/React.createElement("span", {
-    className: "ink font-medium"
-  }, "seven attribute dials"), " and a personality blueprint. Browse our most-loved characters \u2014 or build one of your own below.")), /*#__PURE__*/React.createElement("div", {
-    className: "grid md:grid-cols-2 lg:grid-cols-4 gap-5"
-  }, companions.map((c, i) => /*#__PURE__*/React.createElement("div", {
-    key: c.name,
-    className: "flex justify-center md:block",
-    style: {
-      animation: `flip-in .6s ease ${i * 0.05}s both`
-    }
-  }, /*#__PURE__*/React.createElement(CompanionCard, _extends({}, c, {
-    onClick: () => onOpenChat && onOpenChat(c)
-  }))))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-10 text-center"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "inline-flex items-center gap-2 text-[14px] font-medium px-5 py-3 rounded-full btn-ghost transition"
-  }, "Browse all 240+ companions ", /*#__PURE__*/React.createElement(I.ChevRight, {
-    size: 13
-  })))));
+  }, "02 \u2014 COMPANIONS"),
+  /*#__PURE__*/React.createElement("div", {
+    className: "flex items-end justify-between flex-wrap gap-6 mb-8 md:mb-12"
+  },
+    /*#__PURE__*/React.createElement("h2", {
+      className: "text-[26px] md:text-[64px] tracking-[-0.03em] leading-[1.05] font-semibold max-w-[18ch]"
+    }, "No two are alike. ", /*#__PURE__*/React.createElement("span", { className: "font-serif italic" }, "Pick yours.")),
+    /*#__PURE__*/React.createElement("p", {
+      className: "text-[15px] ink-soft max-w-[44ch] leading-[1.5] mob-hide"
+    }, "Every companion is the sum of ", /*#__PURE__*/React.createElement("span", { className: "ink font-medium" }, "seven attribute dials"), " and a personality blueprint. Browse our most-loved characters \u2014 or build one of your own below.")
+  ),
+
+  /* \u2500\u2500 MOBILE: 2-card paged carousel \u2500\u2500 */
+  isMobile ? /*#__PURE__*/React.createElement("div", { className: "mob-comp-carousel" },
+    /*#__PURE__*/React.createElement("div", {
+      style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+    },
+      (mobPages[mobPage] || []).map((c) =>
+        /*#__PURE__*/React.createElement("div", {
+          key: c.name,
+          style: {
+            borderRadius: 22,
+            border: "1px solid var(--line)",
+            background: "var(--bg)",
+            overflow: "hidden",
+            boxShadow: "0 2px 14px rgba(0,0,0,.06)"
+          }
+        },
+          /* avatar bg */
+          /*#__PURE__*/React.createElement("div", {
+            style: {
+              background: `linear-gradient(140deg, oklch(91% 0.07 ${c.hue[0]}) 0%, oklch(87% 0.09 ${c.hue[1]}) 100%)`,
+              display: "grid", placeItems: "center",
+              position: "relative", overflow: "hidden",
+              aspectRatio: "1"
+            }
+          },
+            /*#__PURE__*/React.createElement("div", {
+              style: {
+                position: "absolute", top: 8, left: 8,
+                fontSize: 9, fontFamily: "monospace",
+                padding: "3px 8px", borderRadius: 10,
+                border: "1px solid rgba(255,255,255,.5)",
+                background: "rgba(255,255,255,.3)",
+                backdropFilter: "blur(4px)",
+                letterSpacing: ".04em"
+              }
+            }, c.mbti),
+            /*#__PURE__*/React.createElement("div", {
+              style: {
+                position: "absolute", top: 8, right: 8,
+                fontSize: 9, color: "rgba(0,0,0,.4)", fontFamily: "monospace"
+              }
+            }, c.owners),
+            /*#__PURE__*/React.createElement("div", { style: { position: "relative", zIndex: 1 } },
+              /*#__PURE__*/React.createElement(CharacterAvatar, { mbti: c.mbti, kind: c.kind, hue: c.hue, size: 90 })
+            )
+          ),
+          /* card body */
+          /*#__PURE__*/React.createElement("div", { style: { padding: "10px 12px 12px" } },
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 700 } }, c.name),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: "var(--ink-mute)", marginBottom: 7 } }, c.role),
+            c.attrs && /*#__PURE__*/React.createElement("div", {
+              style: { display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2, height: 22, alignItems: "end" }
+            },
+              c.attrs.map((v, i) =>
+                /*#__PURE__*/React.createElement("div", {
+                  key: i,
+                  style: { height: v + "%", background: `oklch(70% 0.18 ${ATTRIBUTES[i].hue})`, borderRadius: 2 }
+                })
+              )
+            )
+          )
+        )
+      )
+    ),
+    /* nav row */
+    /*#__PURE__*/React.createElement("div", { className: "mob-nav-row" },
+      /*#__PURE__*/React.createElement("button", {
+        className: "mob-arr",
+        style: { opacity: mobAtStart ? 0.3 : 1 },
+        onClick: () => setMobPage(p => Math.max(0, p - 1))
+      }, "\u2039"),
+      /*#__PURE__*/React.createElement("div", { className: "mob-dots" },
+        mobPages.map((_, i) =>
+          /*#__PURE__*/React.createElement("div", { key: i, className: "mob-dot" + (i === mobPage ? " on" : "") })
+        )
+      ),
+      /*#__PURE__*/React.createElement("button", {
+        className: "mob-arr",
+        style: { opacity: mobAtEnd ? 0.3 : 1 },
+        onClick: () => setMobPage(p => Math.min(mobPages.length - 1, p + 1))
+      }, "\u203a")
+    )
+  )
+
+  /* \u2500\u2500 DESKTOP: original grid \u2500\u2500 */
+  : /*#__PURE__*/React.createElement(React.Fragment, null,
+    /*#__PURE__*/React.createElement("div", {
+      className: "grid md:grid-cols-2 lg:grid-cols-4 gap-5"
+    }, companions.map((c, i) =>
+      /*#__PURE__*/React.createElement("div", {
+        key: c.name,
+        className: "flex justify-center md:block",
+        style: { animation: `flip-in .6s ease ${i * 0.05}s both` }
+      }, /*#__PURE__*/React.createElement(CompanionCard, _extends({}, c, {
+        onClick: () => onOpenChat && onOpenChat(c)
+      })))
+    )),
+    /*#__PURE__*/React.createElement("div", { className: "mt-10 text-center" },
+      /*#__PURE__*/React.createElement("button", {
+        className: "inline-flex items-center gap-2 text-[14px] font-medium px-5 py-3 rounded-full btn-ghost transition"
+      }, "Browse all 240+ companions ", /*#__PURE__*/React.createElement(I.ChevRight, { size: 13 }))
+    )
+  )
+  ));
 }
 
 /* ─────────────────────────────────────────────
@@ -3860,9 +4032,9 @@ function Tuner() {
   }, "Infinite"), " companions."), /*#__PURE__*/React.createElement("p", {
     className: "text-[17px] ink-soft leading-[1.55] self-end"
   }, "Slide the seven attributes \u2014 Warmth, Playfulness, Wit, Curiosity, Empathy, Confidence, Mystery \u2014 and watch your companion\u2019s tone, voice, and color shift in real time. Available to Premium members on any of their slots.")), /*#__PURE__*/React.createElement("div", {
-    className: "grid lg:grid-cols-[1fr_1fr] gap-8"
+    className: "grid lg:grid-cols-[1fr_1fr] gap-8 mob-cust-grid"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-3xl border border-line bg-app p-6 md:p-8"
+    className: "rounded-3xl border border-line bg-app p-6 md:p-8 mob-cust-sliders"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -3886,7 +4058,7 @@ function Tuner() {
       setVals(next);
     }
   })))), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-3xl border border-line bg-app p-6 md:p-8 flex flex-col"
+    className: "rounded-3xl border border-line bg-app p-6 md:p-8 flex flex-col mob-cust-preview"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -4030,6 +4202,8 @@ function Shop() {
   }];
   const filters = ["All", "Featured", "New", "Bestseller", "Premium drops"];
   const [filter, setFilter] = useState("All");
+  const isMobile = useIsMobile();
+  const [mobShopPage, setMobShopPage] = useState(0);
   return /*#__PURE__*/React.createElement("section", {
     id: "shop",
     "data-screen-label": "Shop",
@@ -4072,52 +4246,93 @@ function Shop() {
     key: f,
     onClick: () => setFilter(f),
     className: "text-[12px] font-medium px-3 py-1.5 rounded-full transition " + (filter === f ? "btn-primary" : "ink-soft hover:ink")
-  }, f)))), /*#__PURE__*/React.createElement("div", {
+  }, f)))),
+
+  /* ── MOBILE: 2×2 paged grid ── */
+  isMobile ? ((() => {
+    const mobPages = [];
+    for (let i = 0; i < items.length; i += 4) mobPages.push(items.slice(i, i + 4));
+    const curItems = mobPages[mobShopPage] || [];
+    const tagColors = { Featured: "oklch(58% 0.22 280)", New: "oklch(52% 0.2 150)", Bestseller: "oklch(52% 0.22 30)", Limited: "oklch(48% 0.2 10)" };
+    return /*#__PURE__*/React.createElement(React.Fragment, null,
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 10 }
+      },
+        curItems.map((it) =>
+          /*#__PURE__*/React.createElement("div", {
+            key: it.name,
+            style: { borderRadius: 18, border: "1px solid var(--line)", background: "var(--bg)", overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.05)", display: "flex", flexDirection: "column" }
+          },
+            /*#__PURE__*/React.createElement("div", {
+              style: { background: `linear-gradient(140deg, oklch(91% 0.07 ${it.hue[0]}) 0%, oklch(87% 0.09 ${it.hue[1]}) 100%)`, display: "grid", placeItems: "center", position: "relative", overflow: "hidden", aspectRatio: "1" }
+            },
+              it.tag && /*#__PURE__*/React.createElement("span", {
+                style: { position: "absolute", top: 6, left: 6, fontSize: 8, fontWeight: 700, letterSpacing: ".05em", padding: "2px 7px", borderRadius: 7, background: tagColors[it.tag] || "rgba(0,0,0,.5)", color: "white", textTransform: "uppercase" }
+              }, it.tag),
+              /*#__PURE__*/React.createElement("div", { style: { position: "relative", zIndex: 1 } },
+                /*#__PURE__*/React.createElement(CharacterAvatar, { mbti: it.mbti, hue: it.hue, size: 70 })
+              )
+            ),
+            /*#__PURE__*/React.createElement("div", { style: { padding: "7px 9px 10px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" } },
+              /*#__PURE__*/React.createElement("div", null,
+                /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 3 } },
+                  /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700 } }, it.name),
+                  /*#__PURE__*/React.createElement("span", { style: { fontSize: 8, color: "var(--ink-mute)", fontFamily: "monospace" } }, it.mbti)
+                ),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: "var(--ink-mute)", margin: "2px 0 6px" } }, it.role)
+              ),
+              /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                /*#__PURE__*/React.createElement("span", { style: { fontSize: it.price === "Included" ? 10 : 12, fontWeight: 700, color: it.price === "Included" ? "oklch(52% 0.2 150)" : "var(--ink)" } }, it.price),
+                /*#__PURE__*/React.createElement("button", { style: { display: "flex", alignItems: "center", gap: 3, fontSize: 9, fontWeight: 600, padding: "4px 8px", borderRadius: 12, border: "1px solid var(--line)", background: "transparent", cursor: "pointer", color: "var(--ink-soft)" } },
+                  /*#__PURE__*/React.createElement(I.Cart, { size: 10 }), " Add"
+                )
+              )
+            )
+          )
+        )
+      ),
+      /*#__PURE__*/React.createElement("div", { className: "mob-nav-row" },
+        /*#__PURE__*/React.createElement("button", { className: "mob-arr", style: { opacity: mobShopPage === 0 ? 0.3 : 1 }, onClick: () => setMobShopPage(p => Math.max(0, p - 1)) }, "‹"),
+        /*#__PURE__*/React.createElement("div", { className: "mob-dots" },
+          mobPages.map((_, i) => /*#__PURE__*/React.createElement("div", { key: i, className: "mob-dot" + (i === mobShopPage ? " on" : "") }))
+        ),
+        /*#__PURE__*/React.createElement("button", { className: "mob-arr", style: { opacity: mobShopPage === mobPages.length - 1 ? 0.3 : 1 }, onClick: () => setMobShopPage(p => Math.min(mobPages.length - 1, p + 1)) }, "›")
+      )
+    );
+  })())
+
+  /* ── DESKTOP: original grid ── */
+  : /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
   }, items.map((it, i) => /*#__PURE__*/React.createElement("div", {
     key: it.name,
     className: "holo lift rounded-3xl border border-line bg-app overflow-hidden",
-    style: {
-      animation: `flip-in .6s ease ${i * 0.04}s both`
-    }
+    style: { animation: `flip-in .6s ease ${i * 0.04}s both` }
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative aspect-square grid place-items-center overflow-hidden",
-    style: {
-      background: `linear-gradient(140deg, oklch(91% 0.07 ${it.hue[0]}) 0%, oklch(87% 0.09 ${it.hue[1]}) 100%)`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 opacity-20 aura-mesh"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "relative z-10"
-  }, /*#__PURE__*/React.createElement(CharacterAvatar, {
-    mbti: it.mbti,
-    hue: it.hue,
-    size: 140
-  })), it.tag && /*#__PURE__*/React.createElement("span", {
+    style: { background: `linear-gradient(140deg, oklch(91% 0.07 ${it.hue[0]}) 0%, oklch(87% 0.09 ${it.hue[1]}) 100%)` }
+  }, /*#__PURE__*/React.createElement("div", { className: "absolute inset-0 opacity-20 aura-mesh" }),
+  /*#__PURE__*/React.createElement("div", { className: "relative z-10" },
+    /*#__PURE__*/React.createElement(CharacterAvatar, { mbti: it.mbti, hue: it.hue, size: 140 })
+  ), it.tag && /*#__PURE__*/React.createElement("span", {
     className: "absolute top-3 left-3 text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full text-white",
-    style: {
-      background: "rgba(0,0,0,.55)",
-      backdropFilter: "blur(8px)"
-    }
-  }, it.tag)), /*#__PURE__*/React.createElement("div", {
-    className: "p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between mb-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-[16px] font-semibold tracking-[-0.01em]"
-  }, it.name), /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] font-mono uppercase tracking-wider ink-mute"
-  }, it.mbti)), /*#__PURE__*/React.createElement("div", {
-    className: "text-[13px] ink-mute"
-  }, it.role), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-[15px] font-semibold"
-  }, it.price), /*#__PURE__*/React.createElement("button", {
-    className: "text-[12px] font-medium px-3 py-1.5 rounded-full btn-ghost transition inline-flex items-center gap-1"
-  }, /*#__PURE__*/React.createElement(I.Cart, {
-    size: 12
-  }), " Add"))))))));
+    style: { background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }
+  }, it.tag)),
+  /*#__PURE__*/React.createElement("div", { className: "p-4" },
+    /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between mb-1" },
+      /*#__PURE__*/React.createElement("div", { className: "text-[16px] font-semibold tracking-[-0.01em]" }, it.name),
+      /*#__PURE__*/React.createElement("span", { className: "text-[10px] font-mono uppercase tracking-wider ink-mute" }, it.mbti)
+    ),
+    /*#__PURE__*/React.createElement("div", { className: "text-[13px] ink-mute" }, it.role),
+    /*#__PURE__*/React.createElement("div", { className: "mt-4 flex items-center justify-between" },
+      /*#__PURE__*/React.createElement("div", { className: "text-[15px] font-semibold" }, it.price),
+      /*#__PURE__*/React.createElement("button", { className: "text-[12px] font-medium px-3 py-1.5 rounded-full btn-ghost transition inline-flex items-center gap-1" },
+        /*#__PURE__*/React.createElement(I.Cart, { size: 12 }), " Add"
+      )
+    )
+  )
+  )))
+  ));
 }
 
 /* ─────────────────────────────────────────────
