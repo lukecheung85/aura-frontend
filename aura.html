@@ -409,6 +409,9 @@
 
   /* Desktop: hide mobile-only carousel wrapper */
   .mob-comp-carousel { display: none; }
+  @media (max-width: 768px) {
+    .mob-comp-carousel { display: block !important; }
+  }
 </style>
 </head>
 <body>
@@ -3158,10 +3161,14 @@ function Wordmark({
 function useIsMobile() {
   const [mob, setMob] = useState(() => window.innerWidth <= 768);
   useEffect(() => {
+    const check = () => setMob(window.innerWidth <= 768);
     const mq = window.matchMedia("(max-width: 768px)");
-    const handler = e => setMob(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    mq.addEventListener("change", check);
+    window.addEventListener("resize", check);
+    return () => {
+      mq.removeEventListener("change", check);
+      window.removeEventListener("resize", check);
+    };
   }, []);
   return mob;
 }
