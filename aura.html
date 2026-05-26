@@ -5815,8 +5815,9 @@ function ChatModal({
   const messages = chatHistory && companion ? chatHistory[companion.name] || [] : [];
   const setMessages = updater => {
     if (!companion) return;
-    const next = typeof updater === 'function' ? updater(messages) : updater;
-    onUpdateHistory && onUpdateHistory(companion.name, next);
+    // Pass the updater function directly so the parent always applies it to the latest state,
+    // preventing stale-closure overwrites when user msg + assistant msg arrive in the same sendMessage call.
+    onUpdateHistory && onUpdateHistory(companion.name, updater);
   };
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -6755,11 +6756,13 @@ function App() {
     setChat(companion);
     setActiveCompanions(prev => prev.find(c => c.name === companion.name) ? prev : [...prev, companion]);
   };
-  const updateChatHistory = (companionName, messages) => {
+  const updateChatHistory = (companionName, updater) => {
     setChatHistory(prev => {
+      const current = prev[companionName] || [];
+      const nextMessages = typeof updater === 'function' ? updater(current) : updater;
       const next = {
         ...prev,
-        [companionName]: messages
+        [companionName]: nextMessages
       };
       try {
         sessionStorage.setItem('aura_chat_history', JSON.stringify(next));
